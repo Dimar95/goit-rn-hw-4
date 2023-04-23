@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
@@ -60,13 +60,10 @@ export const Home = ({ navigation }) => {
           headerTitle: "Создать публикацию",
           tabBarActiveTintColor: "#FFFFFF",
           tabBarItemStyle: { borderRadius: 40 },
-          tabBarActiveBackgroundColor: "#F6F6F6",
-          tabBarIcon: ({ focused, size, color }) =>
-            focused ? (
-              <AntDesign name="delete" size={24} color="#BDBDBD" />
-            ) : (
-              <Ionicons name="add" size={30} color={color} />
-            ),
+          tabBarActiveBackgroundColor: "#FF6C00",
+          tabBarIcon: ({ focused, size, color }) => (
+            <Ionicons name="add" size={30} color={color} />
+          ),
         })}
         name="Creat"
         component={CreateScreen}
@@ -106,3 +103,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
+
+// tabBarButton: ({ focused }) =>
+// focused && (
+//   <TouchableOpacity>
+//     <AntDesign name="delete" size={24} color="#BDBDBD" />
+//   </TouchableOpacity>
+// ),
