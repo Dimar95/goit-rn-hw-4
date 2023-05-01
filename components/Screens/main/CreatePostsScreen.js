@@ -1,10 +1,15 @@
+import { useHeaderHeight } from "@react-navigation/elements";
 import {
   Text,
   Image,
   View,
   StyleSheet,
   TextInput,
+  KeyboardAvoidingView,
   TouchableOpacity,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Platform,
   Alert,
 } from "react-native";
 import { Entypo } from "@expo/vector-icons";
@@ -24,6 +29,7 @@ const CreatePostsScreen = ({ navigation }) => {
   const [location, setLocation] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.back);
   const [photo, setPhoto] = useState(null);
+  const height = useHeaderHeight();
 
   useEffect(() => {
     (async () => {
@@ -78,73 +84,86 @@ const CreatePostsScreen = ({ navigation }) => {
     setTitleText("");
   };
   return (
-    <View style={styles.container}>
-      <View>
-        {photo ? (
-          <Image source={{ uri: photo }} style={styles.imgContainer} />
-        ) : (
-          <Camera style={styles.imgContainer} type={type} ref={setCameraRef}>
-            <TouchableOpacity
-              style={styles.iconContainer}
-              onPress={async () => {
-                if (cameraRef) {
-                  const { uri } = await cameraRef.takePictureAsync();
-                  await MediaLibrary.createAssetAsync(uri);
-                  setPhoto(uri);
-                }
+    <KeyboardAvoidingView
+      style={styles.inner}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={height + 10}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+          <View>
+            {photo ? (
+              <Image source={{ uri: photo }} style={styles.imgContainer} />
+            ) : (
+              <Camera
+                style={styles.imgContainer}
+                type={type}
+                ref={setCameraRef}
+              >
+                <TouchableOpacity
+                  style={styles.iconContainer}
+                  onPress={async () => {
+                    if (cameraRef) {
+                      const { uri } = await cameraRef.takePictureAsync();
+                      await MediaLibrary.createAssetAsync(uri);
+                      setPhoto(uri);
+                    }
+                  }}
+                >
+                  <Entypo name="camera" size={24} color="#BDBDBD" />
+                </TouchableOpacity>
+              </Camera>
+            )}
+          </View>
+          <Text
+            style={styles.text}
+            onPress={() => {
+              setPhoto(null);
+            }}
+          >
+            {photo ? "Редактировать фото" : "Загрузите фото"}
+          </Text>
+          <TextInput
+            placeholder={"Название..."}
+            value={titleText}
+            style={styles.input}
+            onChangeText={titleTextHandler}
+          />
+          <View>
+            <TextInput
+              value={locationText}
+              onChangeText={locationTextHandler}
+              placeholder="Местность..."
+              style={{ ...styles.input, paddingLeft: 30 }}
+            />
+            <Feather
+              style={styles.containerInputIcon}
+              name="map-pin"
+              size={24}
+              color="#BDBDBD"
+            />
+          </View>
+          <TouchableOpacity
+            onPress={onPublishPost}
+            style={{
+              ...styles.button,
+              backgroundColor:
+                locationText !== "" && titleText !== "" ? "#FF6C00" : "#F6F6F6",
+            }}
+          >
+            <Text
+              style={{
+                ...styles.buttonText,
+                color:
+                  locationText !== "" && titleText !== "" ? "#FFF" : "#BDBDBD",
               }}
             >
-              <Entypo name="camera" size={24} color="#BDBDBD" />
-            </TouchableOpacity>
-          </Camera>
-        )}
-      </View>
-      <Text
-        style={styles.text}
-        onPress={() => {
-          setPhoto(null);
-        }}
-      >
-        {photo ? "Редактировать фото" : "Загрузите фото"}
-      </Text>
-      <TextInput
-        placeholder={"Название..."}
-        value={titleText}
-        style={styles.input}
-        onChangeText={titleTextHandler}
-      />
-      <View>
-        <TextInput
-          value={locationText}
-          onChangeText={locationTextHandler}
-          placeholder="Местность..."
-          style={{ ...styles.input, paddingLeft: 30 }}
-        />
-        <Feather
-          style={styles.containerInputIcon}
-          name="map-pin"
-          size={24}
-          color="#BDBDBD"
-        />
-      </View>
-      <TouchableOpacity
-        onPress={onPublishPost}
-        style={{
-          ...styles.button,
-          backgroundColor:
-            locationText !== "" && titleText !== "" ? "#FF6C00" : "#F6F6F6",
-        }}
-      >
-        <Text
-          style={{
-            ...styles.buttonText,
-            color: locationText !== "" && titleText !== "" ? "#FFF" : "#BDBDBD",
-          }}
-        >
-          Опубликовать
-        </Text>
-      </TouchableOpacity>
-    </View>
+              Опубликовать
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -160,6 +179,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     alignContent: "space-around",
     textAlign: "left",
+  },
+  inner: {
+    flex: 1,
   },
   buttonText: {
     // fontFamily: "Roboto-Regulat",
@@ -210,7 +232,7 @@ const styles = StyleSheet.create({
   },
   containerInputIcon: {
     position: "relative",
-    top: -42,
+    top: -40,
   },
   button: {
     borderRadius: 100,
