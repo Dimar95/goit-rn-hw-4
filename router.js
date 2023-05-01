@@ -3,7 +3,9 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import PostsScreen from "./components/Screens/main/PostsScreen";
 import CreateScreen from "./components/Screens/main/CreatePostsScreen";
+import CommentsScreen from "./components/Screens/main/CommentsScreen";
 import ProfileScreen from "./components/Screens/main/ProfileScreen";
+import MapScreen from "./components/Screens/main/MapScreen";
 import LoginScreen from "./components/Screens/LoginScreen";
 import { Home } from "./components/Screens/main/Home";
 import RegistrationScreen from "./components/Screens/RegistrationScreen";
@@ -31,6 +33,8 @@ export const useRoute = (isAuth) => {
           name="Home"
           component={Home}
         />
+        <AuthStack.Screen name="CommentsScreen" component={CommentsScreen} />
+        <AuthStack.Screen name="MapScreen" component={MapScreen} />
       </AuthStack.Navigator>
     );
   }

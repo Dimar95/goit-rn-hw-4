@@ -30,12 +30,15 @@ const RegistrationScreen = ({ navigation }) => {
   });
 
   const [showPass, setShowPass] = useState(true);
+  const [userImg, setUserImgs] = useState(
+    require("../../assets/Images/149452.png")
+  );
   const image = require("../../assets/Images/backgr.jpg");
 
   const onSubmit = ({ name, email, password }) => {
     Keyboard.dismiss();
     console.log(`Name: ${name} E-mail: ${email} Password: ${password}`);
-    navigation.navigate("Home");
+    navigation.navigate("Home", { name, email, userImg });
   };
 
   const onShowPass = () => {
@@ -63,6 +66,16 @@ const RegistrationScreen = ({ navigation }) => {
           >
             <View style={styles.formContainer}>
               <View style={styles.avatar}>
+                <Image
+                  source={userImg}
+                  style={{
+                    width: 120,
+                    height: 120,
+                    margin: 0,
+                    padding: 0,
+                    top: 12,
+                  }}
+                />
                 <TouchableOpacity style={styles.imgAdd}>
                   <AntDesign name="pluscircleo" size={24} color="#FF6C00" />
                 </TouchableOpacity>
@@ -237,13 +250,15 @@ const styles = StyleSheet.create({
     bottom: 60,
     justifyContent: "center",
     alignItems: "center",
+    padding: 0,
+    margin: 0,
   },
   formikStyle: {
     paddingHorizontal: 16,
     width: "100%",
   },
   imgAdd: {
-    top: 35,
+    top: -25,
     left: 60,
   },
 });
