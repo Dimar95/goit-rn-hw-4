@@ -28,51 +28,20 @@ export const useRoute = (isAuth) => {
           name="Login"
           component={LoginScreen}
         />
-        <AuthStack.Screen
-          options={{ headerShown: false }}
-          name="Home"
-          component={Home}
-        />
         <AuthStack.Screen name="CommentsScreen" component={CommentsScreen} />
         <AuthStack.Screen name="MapScreen" component={MapScreen} />
       </AuthStack.Navigator>
     );
   }
   return (
-    <Tab.Navigator>
-      <Tab.Screen
-        options={{
-          tabBarShowLabel: false,
-          headerShown: false,
-          tabBarIcon: ({ focused, size, color }) => (
-            <Ionicons name="grid-outline" size={24} color="black" />
-          ),
-        }}
-        name="Posts"
-        component={PostsScreen}
+    <AuthStack.Navigator>
+      <AuthStack.Screen
+        options={{ headerShown: false }}
+        name="Home"
+        component={Home}
       />
-      <Tab.Screen
-        options={{
-          tabBarShowLabel: false,
-          title: "Публикации",
-          tabBarIcon: ({ focused, size, color }) => (
-            <Ionicons name="add" size={30} color="black" />
-          ),
-        }}
-        name="Creat"
-        component={CreateScreen}
-      />
-      <Tab.Screen
-        options={{
-          tabBarShowLabel: false,
-          headerShown: false,
-          tabBarIcon: ({ focused, size, color }) => (
-            <Feather name="user" size={24} color="black" />
-          ),
-        }}
-        name={"Profile"}
-        component={ProfileScreen}
-      />
-    </Tab.Navigator>
+      <AuthStack.Screen name="CommentsScreen" component={CommentsScreen} />
+      <AuthStack.Screen name="MapScreen" component={MapScreen} />
+    </AuthStack.Navigator>
   );
 };

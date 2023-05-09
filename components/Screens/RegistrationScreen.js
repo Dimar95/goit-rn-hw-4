@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Formik } from "formik";
 import { object, string } from "yup";
 import { AntDesign } from "@expo/vector-icons";
-
+import { authSignUpUser } from "../redux/operations";
 import {
   StyleSheet,
   View,
@@ -16,6 +16,7 @@ import {
   Platform,
   Image,
 } from "react-native";
+import { useDispatch } from "react-redux";
 
 const RegistrationScreen = ({ navigation }) => {
   const userSchema = object({
@@ -29,16 +30,19 @@ const RegistrationScreen = ({ navigation }) => {
       .min(6, "Не мение 6 символов"),
   });
 
+  const dispatch = useDispatch();
+
   const [showPass, setShowPass] = useState(true);
   const [userImg, setUserImgs] = useState(
     require("../../assets/Images/149452.png")
   );
+
   const image = require("../../assets/Images/backgr.jpg");
 
   const onSubmit = ({ name, email, password }) => {
     Keyboard.dismiss();
     console.log(`Name: ${name} E-mail: ${email} Password: ${password}`);
-    navigation.navigate("Home", { name, email, userImg });
+    dispatch(authSignUpUser({ name, email, password }));
   };
 
   const onShowPass = () => {

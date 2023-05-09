@@ -10,10 +10,13 @@ import { AntDesign } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
+import { authSignOutUser } from "../../redux/operations";
+import { useDispatch } from "react-redux";
 
 const Tab = createBottomTabNavigator();
 
 export const Home = ({ navigation }) => {
+  const dispatch = useDispatch();
   return (
     <Tab.Navigator>
       <Tab.Screen
@@ -25,7 +28,7 @@ export const Home = ({ navigation }) => {
               size={24}
               color="#BDBDBD"
               onPress={() => {
-                navigation.navigate("Login");
+                dispatch(authSignOutUser());
               }}
             />
           ),

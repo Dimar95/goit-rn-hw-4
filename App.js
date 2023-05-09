@@ -1,22 +1,20 @@
-import { NavigationContainer } from "@react-navigation/native";
+import { PersistGate } from "redux-persist/integration/react";
+import { store, persistor } from "./components/redux/store";
 
-import { StyleSheet, View } from "react-native";
-import { useRoute } from "./router";
+import { Provider } from "react-redux";
+import MainComponent from "./components/MainComponent";
+import { useCallback } from "react";
 import { useFonts } from "expo-font";
-import { useCallback, useState } from "react";
-
 import * as SplashScreen from "expo-splash-screen";
+import { View, StyleSheet } from "react-native";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
-  const [auth, setAuth] = useState(false);
-  const routing = useRoute(auth, setAuth);
   const [fontsLoaded] = useFonts({
     "Roboto-Regulat": require("./assets/fonts/Roboto-Regular.ttf"),
     "Roboto-Bold": require("./assets/fonts/Roboto-Bold.ttf"),
   });
-
   const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded) {
       await SplashScreen.hideAsync();
@@ -27,11 +25,13 @@ export default function App() {
     return;
   }
   return (
-    <NavigationContainer>
-      <View style={styles.container} onLayout={onLayoutRootView}>
-        {routing}
-      </View>
-    </NavigationContainer>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <View style={styles.container} onLayout={onLayoutRootView}>
+          <MainComponent />
+        </View>
+      </PersistGate>
+    </Provider>
   );
 }
 

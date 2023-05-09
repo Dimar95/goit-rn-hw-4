@@ -13,10 +13,14 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { useDispatch } from "react-redux";
+import { authSignInUser } from "../redux/operations";
 
 const LoginScreen = ({ navigation }) => {
   const image = require("../../assets/Images/backgr.jpg");
+
   const [showPass, setShowPass] = useState(true);
+
   const userSchema = object({
     email: string()
       .email("Invalid Email")
@@ -27,10 +31,11 @@ const LoginScreen = ({ navigation }) => {
       .min(6, "Не мение 6 символов"),
   });
 
+  const dispathc = useDispatch();
   const onSubmit = ({ email, password }) => {
     Keyboard.dismiss();
     console.log(`E-mail: ${email} Password: ${password}`);
-    navigation.navigate("Home");
+    dispathc(authSignInUser({ email, password }));
   };
 
   const onShowPass = () => {
