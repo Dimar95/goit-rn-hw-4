@@ -18,6 +18,8 @@ import { Feather } from "@expo/vector-icons";
 import { Camera } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
 import * as Location from "expo-location";
+import { storage } from "../../../firebase/config";
+import { ref, uploadBytes } from "firebase/storage";
 
 const CreatePostsScreen = ({ navigation }) => {
   const [locationText, setLocationText] = useState("");
@@ -30,6 +32,14 @@ const CreatePostsScreen = ({ navigation }) => {
   const [type, setType] = useState(Camera.Constants.Type.back);
   const [photo, setPhoto] = useState(null);
   const height = useHeaderHeight();
+
+  const uploadPhotoToServer = async () => {
+    const response = await fetch(photo);
+    const file = await response.blob();
+    const uniquePostId = Date.now().toString();
+    const storageRef = ref(storage, `postImage/${uniquePostId}`);
+    uploadBytes(storageRef, file);
+  };
 
   useEffect(() => {
     (async () => {
@@ -70,6 +80,7 @@ const CreatePostsScreen = ({ navigation }) => {
       Alert.alert("Вигадайте назву для вашого фото");
       return;
     }
+    uploadPhotoToServer();
     navigation.navigate("Posts", {
       photo,
       locationText,
