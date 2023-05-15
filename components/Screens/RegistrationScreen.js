@@ -17,6 +17,9 @@ import {
   Image,
 } from "react-native";
 import { useDispatch } from "react-redux";
+import * as ImagePicker from "expo-image-picker";
+import { storage } from "../../firebase/config";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const RegistrationScreen = ({ navigation }) => {
   const userSchema = object({
@@ -33,16 +36,42 @@ const RegistrationScreen = ({ navigation }) => {
   const dispatch = useDispatch();
 
   const [showPass, setShowPass] = useState(true);
-  const [userImg, setUserImgs] = useState(
-    require("../../assets/Images/149452.png")
+  const [userImg, setUserImg] = useState(
+    "https://www.pngmart.com/files/22/User-Avatar-Profile-PNG.png"
   );
 
   const image = require("../../assets/Images/backgr.jpg");
 
-  const onSubmit = ({ name, email, password }) => {
+  const onSubmit = async ({ name, email, password }) => {
     Keyboard.dismiss();
-    console.log(`Name: ${name} E-mail: ${email} Password: ${password}`);
-    dispatch(authSignUpUser({ name, email, password }));
+    dispatch(
+      authSignUpUser({ name, userEmail: email, password, avatar: userImg })
+    );
+  };
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    console.log(result.assets[0].uri);
+
+    if (!result.canceled) {
+      setUserImg(result.assets[0].uri);
+    }
+  };
+
+  const uploadPhotoToServer = async () => {
+    const response = await fetch(userImg);
+    const file = await response.blob();
+    const uniquePostId = Date.now().toString();
+    const storageRef = await ref(storage, `userImage/${uniquePostId}`);
+    await uploadBytes(storageRef, file);
+    const procesedPhoto = await getDownloadURL(storageRef);
+    setUserImg(procesedPhoto);
   };
 
   const onShowPass = () => {
@@ -71,7 +100,7 @@ const RegistrationScreen = ({ navigation }) => {
             <View style={styles.formContainer}>
               <View style={styles.avatar}>
                 <Image
-                  source={userImg}
+                  source={{ uri: userImg }}
                   style={{
                     width: 120,
                     height: 120,
@@ -80,7 +109,12 @@ const RegistrationScreen = ({ navigation }) => {
                     top: 12,
                   }}
                 />
-                <TouchableOpacity style={styles.imgAdd}>
+                <TouchableOpacity
+                  style={styles.imgAdd}
+                  onPress={() => {
+                    pickImage();
+                  }}
+                >
                   <AntDesign name="pluscircleo" size={24} color="#FF6C00" />
                 </TouchableOpacity>
               </View>

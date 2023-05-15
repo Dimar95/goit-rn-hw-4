@@ -18,8 +18,10 @@ import { Feather } from "@expo/vector-icons";
 import { Camera } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
 import * as Location from "expo-location";
-import { storage } from "../../../firebase/config";
-import { ref, uploadBytes } from "firebase/storage";
+import { db, storage } from "../../../firebase/config";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { useSelector } from "react-redux";
+import { addDoc, collection } from "firebase/firestore";
 
 const CreatePostsScreen = ({ navigation }) => {
   const [locationText, setLocationText] = useState("");
@@ -32,13 +34,16 @@ const CreatePostsScreen = ({ navigation }) => {
   const [type, setType] = useState(Camera.Constants.Type.back);
   const [photo, setPhoto] = useState(null);
   const height = useHeaderHeight();
+  const { userId, displayName } = useSelector((state) => state.auth);
 
   const uploadPhotoToServer = async () => {
     const response = await fetch(photo);
     const file = await response.blob();
     const uniquePostId = Date.now().toString();
-    const storageRef = ref(storage, `postImage/${uniquePostId}`);
-    uploadBytes(storageRef, file);
+    const storageRef = await ref(storage, `postImage/${uniquePostId}`);
+    await uploadBytes(storageRef, file);
+    const procesedPhoto = await getDownloadURL(storageRef);
+    return procesedPhoto;
   };
 
   useEffect(() => {
@@ -67,7 +72,7 @@ const CreatePostsScreen = ({ navigation }) => {
     })();
   }, []);
 
-  const onPublishPost = () => {
+  const onPublishPost = async () => {
     if (!photo) {
       Alert.alert("Зробіть фото. Пост без фото створити неможливо");
       return;
@@ -80,7 +85,17 @@ const CreatePostsScreen = ({ navigation }) => {
       Alert.alert("Вигадайте назву для вашого фото");
       return;
     }
-    uploadPhotoToServer();
+    const photoRef = await uploadPhotoToServer();
+    const newPost = {
+      photoRef,
+      locationText,
+      titleText,
+      location,
+      userId,
+      displayName,
+    };
+    uploadPostToDatabase(newPost);
+
     navigation.navigate("Posts", {
       photo,
       locationText,
@@ -88,6 +103,14 @@ const CreatePostsScreen = ({ navigation }) => {
       location,
     });
     resetForm();
+  };
+  const uploadPostToDatabase = async (post) => {
+    try {
+      const docRef = await addDoc(collection(db, "post"), post);
+      console.log("Document written with ID: ", docRef.id);
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
   };
   const resetForm = () => {
     setPhoto(null);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { format } from "date-fns";
@@ -15,24 +15,46 @@ import {
   Keyboard,
   FlatList,
 } from "react-native";
+import { db } from "../../../firebase/config";
+import { useSelector } from "react-redux";
+import { collection, query, doc, addDoc, onSnapshot } from "firebase/firestore";
 
 const CommentsScreen = ({ route }) => {
   const titleTextHandler = (text) => setText(text);
   const [text, setText] = useState("");
   const [comments, setComments] = useState([]);
-  console.log("🚀 ~ comments:", comments);
   const height = useHeaderHeight();
-  const { photo } = route.params;
+  const { photo, id } = route.params;
+  const { userId, displayName } = useSelector((state) => state.auth);
+  useEffect(() => {
+    getAllPosts();
+  }, []);
+  const getAllPosts = async () => {
+    const q = query(collection(doc(db, "post", id), "comments"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const cities = [];
+      querySnapshot.forEach((doc) => {
+        cities.push({ ...doc.data(), id: doc.id });
+      });
 
-  const onAddComment = () => {
+      setComments(cities);
+    });
+  };
+
+  const onAddComment = async () => {
     const data = format(new Date(), "dd MMMM yyyy | HH : mm");
     const comment = {
       text,
       data,
+      displayName,
     };
-    setComments((prevState) => [...prevState, comment]);
-    console.log("🚀 ~ comment:", comment);
+
+    const docRef = await addDoc(
+      collection(doc(db, "post", id), "comments"),
+      comment
+    );
   };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}

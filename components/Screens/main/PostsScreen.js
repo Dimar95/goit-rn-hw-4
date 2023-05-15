@@ -9,24 +9,48 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
+import { db } from "../../../firebase/config";
+import { useSelector } from "react-redux";
+import { collection, query, onSnapshot } from "firebase/firestore";
 
-const PostsScreen = ({ navigation, route }) => {
+const PostsScreen = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
+  const { email, displayImg, displayName } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    if (route.params) {
-      setPosts((prevState) => [...prevState, route.params]);
-    }
-  }, [route.params]);
+    gerAllPosts();
+  }, []);
+
+  const gerAllPosts = async () => {
+    const q = query(collection(db, "post"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const cities = [];
+      querySnapshot.forEach((doc) => {
+        cities.push({ ...doc.data(), id: doc.id });
+      });
+
+      setPosts(cities);
+    });
+    // setPosts(querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+    // doc.data() is never undefined for query doc snapshots
+  };
 
   return (
     <View style={styles.container}>
+      <View style={styles.prifileContainer}>
+        <Image style={styles.prifileImg} source={{ uri: displayImg }} />
+        <View style={styles.prifileText}>
+          <Text style={{ fontFamily: "Roboto-Bold" }}>{displayName}</Text>
+          <Text style={styles.prifileEmail}>{email}</Text>
+        </View>
+      </View>
       <FlatList
         style={styles.postContainer}
         data={posts}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={{ marginBottom: 32 }}>
-            <Image style={styles.img} source={{ uri: item.photo }} />
+            <Image style={styles.img} source={{ uri: item.photoRef }} />
             <View style={styles.discrContainer}>
               <Text style={styles.title}>{item.titleText}</Text>
               <View style={styles.containerDown}>
@@ -66,7 +90,6 @@ const PostsScreen = ({ navigation, route }) => {
             </View>
           </View>
         )}
-        keyExtractor={(item) => item.photo}
       ></FlatList>
     </View>
   );
@@ -109,5 +132,18 @@ const styles = StyleSheet.create({
   containerDown: {
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+  prifileContainer: {
+    width: "100%",
+    paddingLeft: 16,
+    display: "flex",
+    flexDirection: "row",
+    marginTop: 32,
+    alignItems: "center",
+    justifyContent: "flex-start",
+  },
+  prifileImg: {
+    width: 60,
+    height: 60,
   },
 });

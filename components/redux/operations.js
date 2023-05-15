@@ -15,7 +15,14 @@ export const authSignInUser =
   async (dispatch, getSatte) => {
     try {
       const { user } = await signInWithEmailAndPassword(auth, email, password);
-      dispatch(updateUserProfile({ userId: user.uid }));
+      dispatch(
+        updateUserProfile({
+          displayName: user.displayName,
+          userId: user.uid,
+          displayImg: user.photoURL,
+          email: user.email,
+        })
+      );
     } catch (error) {
       console.log("error.message", error.message);
       console.log("🚀 ~ error:", error);
@@ -23,22 +30,25 @@ export const authSignInUser =
   };
 
 export const authSignUpUser =
-  ({ name, email, password }) =>
+  ({ name, userEmail, password, avatar }) =>
   async (dispatch, getSatte) => {
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      await createUserWithEmailAndPassword(auth, userEmail, password);
 
       const user = await auth.currentUser;
 
       await updateProfile(user, {
         displayName: name,
+        photoURL: avatar,
       });
 
-      const { displayName, uid } = await auth.currentUser;
+      const { displayName, email, uid, photoURL } = await auth.currentUser;
       dispatch(
         updateUserProfile({
           userId: uid,
           displayName,
+          displayImg: photoURL,
+          email,
         })
       );
     } catch (error) {
@@ -59,8 +69,9 @@ export const authStateChanged = () => async (dispatch, getSatte) => {
       const userUpdateProfile = {
         displayName: user.displayName,
         userId: user.uid,
+        displayImg: user.photoURL,
+        email: user.email,
       };
-      console.log("🚀 ~ userUpdateProfile:", userUpdateProfile);
       dispatch(updateUserProfile(userUpdateProfile));
       dispatch(authStateChange(true));
     }
