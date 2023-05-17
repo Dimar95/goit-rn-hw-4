@@ -57,7 +57,8 @@ const RegistrationScreen = ({ navigation }) => {
       quality: 1,
     });
     if (!result.canceled) {
-      setUserImg(result.assets[0].uri);
+      const ref = await uploadPhotoToServer(result.assets[0].uri);
+      setUserImg(ref);
     }
   };
   useMemo(() => {
@@ -65,14 +66,14 @@ const RegistrationScreen = ({ navigation }) => {
       Alert.alert(error);
     }
   }, [error]);
-  const uploadPhotoToServer = async () => {
-    const response = await fetch(userImg);
+  const uploadPhotoToServer = async (img) => {
+    const response = await fetch(img);
     const file = await response.blob();
     const uniquePostId = Date.now().toString();
     const storageRef = await ref(storage, `userImage/${uniquePostId}`);
     await uploadBytes(storageRef, file);
     const procesedPhoto = await getDownloadURL(storageRef);
-    setUserImg(procesedPhoto);
+    return procesedPhoto;
   };
 
   const onShowPass = () => {

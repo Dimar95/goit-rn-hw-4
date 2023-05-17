@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import {
   Text,
@@ -8,7 +9,6 @@ import {
   Image,
   TouchableOpacity,
 } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
 import { db } from "../../../firebase/config";
 import { useSelector } from "react-redux";
 import {
@@ -21,12 +21,11 @@ import {
 
 const PostsScreen = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
-  console.log("🚀 ~ posts:", posts);
 
   const { email, displayImg, displayName } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    gerAllPosts();
+    getAllPosts();
   }, []);
 
   const getAllComments = async (id) => {
@@ -36,7 +35,7 @@ const PostsScreen = ({ navigation }) => {
     return querySnapshot.docs.length;
   };
 
-  const gerAllPosts = async () => {
+  const getAllPosts = async () => {
     const q = query(collection(db, "post"));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const cities = [];

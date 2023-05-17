@@ -39,7 +39,7 @@ const CommentsScreen = ({ route }) => {
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const cities = [];
       querySnapshot.forEach((doc) => {
-        cities.unshift({ ...doc.data(), id: doc.id });
+        cities.push({ ...doc.data(), id: doc.id });
       });
       setComments(cities);
     });
