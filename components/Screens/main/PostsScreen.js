@@ -11,28 +11,45 @@ import {
 import { FontAwesome } from "@expo/vector-icons";
 import { db } from "../../../firebase/config";
 import { useSelector } from "react-redux";
-import { collection, query, onSnapshot } from "firebase/firestore";
+import {
+  collection,
+  query,
+  onSnapshot,
+  doc,
+  getDocs,
+} from "firebase/firestore";
 
 const PostsScreen = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
+  console.log("🚀 ~ posts:", posts);
+
   const { email, displayImg, displayName } = useSelector((state) => state.auth);
 
   useEffect(() => {
     gerAllPosts();
   }, []);
 
+  const getAllComments = async (id) => {
+    const q = query(collection(doc(db, "post", id), "comments"));
+
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.length;
+  };
+
   const gerAllPosts = async () => {
     const q = query(collection(db, "post"));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const cities = [];
-      querySnapshot.forEach((doc) => {
-        cities.push({ ...doc.data(), id: doc.id });
+      querySnapshot.forEach(async (doc) => {
+        const total = await getAllComments(doc.id);
+        cities.push({
+          ...doc.data(),
+          id: doc.id,
+          total,
+        });
       });
-
       setPosts(cities);
     });
-    // setPosts(querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
-    // doc.data() is never undefined for query doc snapshots
   };
 
   return (
@@ -48,6 +65,7 @@ const PostsScreen = ({ navigation }) => {
         style={styles.postContainer}
         data={posts}
         keyExtractor={(item) => item.id}
+        totalComments={(item) => getAllComments(item.id)}
         renderItem={({ item }) => (
           <View style={{ marginBottom: 32 }}>
             <Image style={styles.img} source={{ uri: item.photoRef }} />
@@ -68,7 +86,7 @@ const PostsScreen = ({ navigation }) => {
                     size={24}
                     color="#BDBDBD"
                   />
-                  <Text>0</Text>
+                  <Text>{item.total}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.locationContainer}

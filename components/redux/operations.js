@@ -8,7 +8,8 @@ import {
 import { authSlice } from "./authSlice";
 import { auth } from "../../firebase/config";
 
-const { updateUserProfile, authStateChange, authSingOut } = authSlice.actions;
+const { updateUserProfile, authError, authStateChange, authSingOut } =
+  authSlice.actions;
 
 export const authSignInUser =
   ({ email, password }) =>
@@ -24,6 +25,7 @@ export const authSignInUser =
         })
       );
     } catch (error) {
+      dispatch(authError(error.message));
       console.log("error.message", error.message);
       console.log("🚀 ~ error:", error);
     }
@@ -54,6 +56,7 @@ export const authSignUpUser =
     } catch (error) {
       console.log("error.message", error.message);
       console.log("🚀 ~ error:", error);
+      dispatch(authError(error.message));
     }
   };
 
@@ -64,7 +67,6 @@ export const authSignOutUser = () => async (dispatch, getSatte) => {
 
 export const authStateChanged = () => async (dispatch, getSatte) => {
   await onAuthStateChanged(auth, (user) => {
-    console.log("🚀 ~ user:", user);
     if (user) {
       const userUpdateProfile = {
         displayName: user.displayName,

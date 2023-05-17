@@ -6,6 +6,7 @@ const state = {
   stateChange: false,
   displayImg: null,
   email: null,
+  error: null,
 };
 export const authSlice = createSlice({
   name: "auth",
@@ -23,5 +24,9 @@ export const authSlice = createSlice({
       stateChange: payload,
     }),
     authSingOut: () => state,
+    authError: (state, { payload }) => ({
+      ...state,
+      error: payload,
+    }),
   },
 });

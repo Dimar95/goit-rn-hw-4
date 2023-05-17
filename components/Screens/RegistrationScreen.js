@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Formik } from "formik";
 import { object, string } from "yup";
 import { AntDesign } from "@expo/vector-icons";
@@ -15,8 +15,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
+  Alert,
 } from "react-native";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import * as ImagePicker from "expo-image-picker";
 import { storage } from "../../firebase/config";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -34,7 +35,7 @@ const RegistrationScreen = ({ navigation }) => {
   });
 
   const dispatch = useDispatch();
-
+  const error = useSelector((state) => state.auth.error);
   const [showPass, setShowPass] = useState(true);
   const [userImg, setUserImg] = useState(
     "https://www.pngmart.com/files/22/User-Avatar-Profile-PNG.png"
@@ -49,21 +50,21 @@ const RegistrationScreen = ({ navigation }) => {
     );
   };
   const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
-
-    console.log(result.assets[0].uri);
-
     if (!result.canceled) {
       setUserImg(result.assets[0].uri);
     }
   };
-
+  useMemo(() => {
+    if (error) {
+      Alert.alert(error);
+    }
+  }, [error]);
   const uploadPhotoToServer = async () => {
     const response = await fetch(userImg);
     const file = await response.blob();

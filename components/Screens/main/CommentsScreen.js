@@ -23,20 +23,24 @@ const CommentsScreen = ({ route }) => {
   const titleTextHandler = (text) => setText(text);
   const [text, setText] = useState("");
   const [comments, setComments] = useState([]);
+  console.log("🚀 ~ comments:", comments);
   const height = useHeaderHeight();
-  const { photo, id } = route.params;
-  const { userId, displayName } = useSelector((state) => state.auth);
+  const { photoRef, id } = route.params;
+
+  const { userId, displayName, displayImg } = useSelector(
+    (state) => state.auth
+  );
   useEffect(() => {
-    getAllPosts();
+    getAllComments();
   }, []);
-  const getAllPosts = async () => {
+
+  const getAllComments = async () => {
     const q = query(collection(doc(db, "post", id), "comments"));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const cities = [];
       querySnapshot.forEach((doc) => {
-        cities.push({ ...doc.data(), id: doc.id });
+        cities.unshift({ ...doc.data(), id: doc.id });
       });
-
       setComments(cities);
     });
   };
@@ -47,12 +51,15 @@ const CommentsScreen = ({ route }) => {
       text,
       data,
       displayName,
+      userId,
+      displayImg,
     };
 
     const docRef = await addDoc(
       collection(doc(db, "post", id), "comments"),
       comment
     );
+    setText("");
   };
 
   return (
@@ -64,20 +71,32 @@ const CommentsScreen = ({ route }) => {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.inner}>
           <View style={styles.postContainer}>
-            <Image style={styles.img} source={{ uri: photo }} />
+            <Image style={styles.img} source={{ uri: photoRef }} />
           </View>
           <FlatList
             data={comments}
-            keyExtractor={(item) => item.text}
+            keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <View style={{ flexDirection: "row" }}>
-                <View style={styles.myCommentContainer}>
+              <View
+                style={
+                  item.userId === userId
+                    ? { flexDirection: "row" }
+                    : { flexDirection: "row-reverse" }
+                }
+              >
+                <View
+                  style={
+                    item.userId === userId
+                      ? styles.myCommentContainer
+                      : styles.commentContainerRevers
+                  }
+                >
                   <Text style={styles.comment}>{item.text}</Text>
                   <Text style={styles.data}>{item.data}</Text>
                 </View>
                 <View>
                   <Image
-                    source={require("../../../assets/Images/149452.png")}
+                    source={{ uri: item.displayImg }}
                     style={{ width: 28, height: 28, marginTop: 16 }}
                   />
                 </View>
@@ -162,6 +181,15 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 16,
     borderBottomLeftRadius: 16,
     borderTopLeftRadius: 16,
+  },
+  commentContainerRevers: {
+    width: 300,
+    padding: 16,
+    backgroundColor: "rgba(0, 0, 0, 0.03)",
+    margin: 16,
+    borderBottomRightRadius: 16,
+    borderBottomLeftRadius: 16,
+    borderTopRightRadius: 16,
   },
   userImg: {},
   comment: {
